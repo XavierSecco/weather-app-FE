@@ -1,77 +1,52 @@
-// function submitform(){
-
-//     //get the form from DOM (Document object model) 
-//     var form = document.getElementById('request-form');
-//     form.onsubmit = function(event){
-//         console.log("hola")
-//         var xhr = new XMLHttpRequest();
-//         var data = new FormData(form);
-//         //open the request
-//         xhr.open('POST','http://localhost:5000/get-weather-data')
-//         xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-//         var json = JSON.stringify(Object.fromEntries(formData));
-//         console.log(json)
-//         xhr.send(json);
-
-//         xhr.onreadystatechange = function() {
-//             if (xhr.readyState == XMLHttpRequest.DONE) {
-//                 form.reset(); //reset form after AJAX success.
-//             }
-//         }
-
-//         //Dont submit the form.
-//         return false; 
-//     }
-// }
-
-
-
-    var form = document.getElementById("request-form");
-
-    form.addEventListener("submit", function(e){
-        // prevent auto submision of the form
-        e.preventDefault()
-
+let weather = {
+    fetchWeather: function(city){
         fetch('https://calm-tor-07487.herokuapp.com/https://checking-my-city-weather.herokuapp.com/get-weather-data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 },
             body: JSON.stringify({
-                city: document.getElementById('city-name').value,
-                measurement_unit: document.getElementById('measurement-unit').value
+                city: city,
+                measurement_unit: "metric" /*document.getElementById('measurement-unit').value*/
             })
         })
-        .then(function(response){
-            return response.json()
-        })
-        .then(function(data){
-            console.log(data)
-        })
+        .then((response) => response.json())
+        .then((data) => this.displayWeather(data));
+    },
 
-    })
+    displayWeather: function(data){
+        const {name} = data;
+        const {icon, description} = data.weather;
+        const {temp, humidity} = data.main;
+        const {speed} = data.wind;
 
+        console.log(name,icon,description,temp,humidity,speed)
 
-// formElem.onsubmit = async (e) => {
-//     e.preventDefault();
+        document.querySelector(".city").innerText = "Weather in " + name;
+        document.querySelector(".icon").src = "https://openweathermap.org/img/wn/" + icon + ".png";
+        document.querySelector(".description").innerText = description;
+        document.querySelector(".temp").innerText = temp + "°C";
+        document.querySelector(".humidity").innerText = "Humidity: " + humidity + "%";
+        document.querySelector(".wind").innerText = "Wind speed: : " + speed + "km/h";
 
-//     var form = document.querySelector("#request-form");
-//     let form = document.forms[0];
+        document.querySelector(".weather").classList.remove("loading");
 
-//     data = {
-//     city : form.querySelector('input[city="cityname"]').value,
-//     measurement_unit : form.querySelector('input[measurement-unit="unit"]').value,
-//     }
+        document.body.style.backgroundImage = 'url("https://source.unsplash.com/1600x900/?' + name + '")'
+    },
 
-//     let response = await fetch('http://localhost:5000/get-weather-data', {
-//         method: 'POST', // or 'PUT'
-//         headers: {
-//             'Content-Type': 'application/json',
-//             },
-//         body: JSON.stringify(data),
-//        })
+    search: function(){
+        this.fetchWeather(document.querySelector(".search-bar").value);
+    }
+};
 
-//     xhr.open(form.method, form.action, true);
-//     let text = await response.text(); // read response body as text
-//     document.querySelector("#decoded").innerHTML = text;
-// };
+document.querySelector(".search button").addEventListener("click", function(){
+    weather.search();
+});
+
+document.querySelector(".search-bar").addEventListener("keyup", function(event){
+    if(event.key == "Enter"){
+        weather.search();
+    }
+});
+
+weather.fetchWeather("Denver");
