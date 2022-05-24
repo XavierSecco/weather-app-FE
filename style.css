@@ -70,13 +70,13 @@ h1.temp{
     margin-left: 8px;
 }
 
-.weahter.loading{
+.weather.loading{
     visibility: hidden;
     max-height: 20px;
     position: relative;
 }
 
-.weahter.loading:after{
+.weather.loading:after{
     visibility: visible;
     content: "Loading...";
     color: white;
